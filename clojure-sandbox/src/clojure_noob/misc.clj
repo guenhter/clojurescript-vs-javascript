@@ -43,3 +43,13 @@ alsdjf")
 (println (count (time (for [x (range (* 900 700))] x))))
 (println (count (time (doall (for [x (range (* 900 700))] x)))))
 (println (count (time (vec (for [x (range (* 900 700))] x)))))
+
+(do (println "111")
+    (println "222")
+    (println "333"))
+
+(let [x 5] (println x))
+
+(println true)
+
+(println ({:a 1} :a))

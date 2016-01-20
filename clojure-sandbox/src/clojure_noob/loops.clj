@@ -22,3 +22,22 @@
 
 
 (doall (map #(println %) [1 2 3]))
+
+(println (loop [x 0
+                sum 0]
+           (if (< x 10)
+             (recur (inc x) (+ sum x))
+             sum)))
+
+(defn s [x sum]
+  (if (< x 1000000)
+    (s (inc x) (+ x sum))
+    sum)
+  )
+(println (s 0 0))
+
+(println ((fn [x sum]
+   (if (< x 1000000)
+     (recur (inc x) (+ sum x))
+     sum))
+  0 0))
