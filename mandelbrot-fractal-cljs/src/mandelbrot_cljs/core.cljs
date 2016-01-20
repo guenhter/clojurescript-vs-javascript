@@ -7,8 +7,9 @@
 (def WIDTH 900)
 (def HEIGHT 600)
 
-(defonce history (atom [(vec (repeat (* WIDTH HEIGHT) 0))]))
-(defonce iteration (atom 1))
+(def state (atom { :started false }))
+(def history (atom [(vector (repeat (* WIDTH HEIGHT) 0))]))
+(def iteration (atom 1))
 
 (defn mandelbrotPixelIter [cx, cy, maxIter]
   (loop [x 0.0
@@ -58,6 +59,7 @@
   (aset pix (+ ppos 3) 255)
   )
 
+; TODO check if image can be cept persistier
 (defn mandelbrotToCanvas [model canvas iterations]
   (let [ctx (.getContext (.get canvas 0) "2d")
         img (.getImageData ctx 0 0 WIDTH HEIGHT)
@@ -78,23 +80,22 @@
        ))
     (.putImageData ctx img 0 0)))
 
-(defn started? []
-  (= (.html ($ :#startStopButton)) "Stop"))
-
 (defn startStop [_e]
   "Set the corresponding information for the game to be stopped/started"
   (let [$button ($ :#startStopButton)
         $input ($ :#iterationsInput)]
 
-    (if (started?)
+    (if (@state :started)
       (do (.html $button "Start")
-          (.prop $input "disabled" false))
+          (.prop $input "disabled" false)
+          (swap! state assoc :started false))
       (do (.html $button "Stop")
           (reset! iteration 0)
-          (.prop $input "disabled" true)))))
+          (.prop $input "disabled" true)
+          (swap! state assoc :started true)))))
 
 (defn gameLoop []
-  (if (started?)
+  (if (@state :started)
     (if (<= @iteration (reader/read-string (.val ($ :#iterationsInput))))
       (let [$out ($ :#iterationsOutput)
             $canvas ($ :#canvas)
@@ -114,8 +115,4 @@
 (.click ($ :#startStopButton) startStop)
 (.setInterval js/window gameLoop 30)
 
-(defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+(defn on-js-reload [] )
