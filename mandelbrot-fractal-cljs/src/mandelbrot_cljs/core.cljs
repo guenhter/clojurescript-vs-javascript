@@ -1,13 +1,13 @@
 (ns mandelbrot-cljs.core
-  (:require [cljs.reader :as reader])
-  (:use [jayq.core :only [$ css html]]))
+  (:require [cljs.reader :as reader]))
 
 (enable-console-print!)
 
 (def WIDTH 900)
 (def HEIGHT 600)
 
-(def state (atom { :started false }))
+(def state (atom { :started false
+                   :in-calculation false}))
 (def history (atom [(vector (repeat (* WIDTH HEIGHT) 0))]))
 (def iteration (atom 1))
 
@@ -44,14 +44,6 @@
 (defn mandelbrotBoardIter [model, xmin, xmax, ymin, ymax, iterations]
   (mandelbrotBoardIterB model xmin xmax ymin ymax 0 0 iterations))
 
-;(defn mandelbrotBoardIterOri [model, xmin, xmax, ymin, ymax, iterations]
-;  (vec
-;    (for [iy (range HEIGHT)
-;          ix (range WIDTH)]
-;      (let [x (+ xmin (/ (* (- xmax xmin) ix) (- WIDTH 1)))
-;            y (+ ymin (/ (* (- ymax ymin) iy) (- HEIGHT 1)))]
-;        (mandelbrotPixelIter x y iterations)))))
-
 (defn rgb [pix ppos r g b]
   (aset pix ppos r)
   (aset pix (+ ppos 1) g)
@@ -61,7 +53,7 @@
 
 ; TODO check if image can be cept persistier
 (defn mandelbrotToCanvas [model canvas iterations]
-  (let [ctx (.getContext (.get canvas 0) "2d")
+  (let [ctx (.getContext canvas "2d")
         img (.getImageData ctx 0 0 WIDTH HEIGHT)
         pix (.-data img)]
 
@@ -80,26 +72,31 @@
        ))
     (.putImageData ctx img 0 0)))
 
+
+(defn by-id [id]
+  (.getElementById js/document (name id)))
+
 (defn startStop [_e]
   "Set the corresponding information for the game to be stopped/started"
-  (let [$button ($ :#startStopButton)
-        $input ($ :#iterationsInput)]
+  (let [$button (by-id "startStopButton")
+        $input (by-id "iterationsInput")]
 
     (if (@state :started)
-      (do (.html $button "Start")
-          (.prop $input "disabled" false)
+      (do (set! (.-innerHTML $button) "Start")
+          (set! (.-disabled $input) "disabled" false)
           (swap! state assoc :started false))
-      (do (.html $button "Stop")
+      (do (set! (.-innerHTML $button) "Stop")
+          (set! (.-disabled $input) true)
           (reset! iteration 0)
-          (.prop $input "disabled" true)
           (swap! state assoc :started true)))))
 
 (defn gameLoop []
-  (if (@state :started)
-    (if (<= @iteration (reader/read-string (.val ($ :#iterationsInput))))
-      (let [$out ($ :#iterationsOutput)
-            $canvas ($ :#canvas)
+  (if (and (@state :started) (not (@state :in-calculation)))
+    (if (<= @iteration (reader/read-string (.-value (by-id "iterationsInput"))))
+      (let [$out (by-id "iterationsOutput")
+            $canvas (by-id "canvas")
             lastModel (last @history)]
+        (swap! state assoc :in-calculation false)
         (set! (.-width $canvas) WIDTH)
         (set! (.-height $canvas) HEIGHT)
 
@@ -107,12 +104,11 @@
           (swap! history conj (mandelbrotBoardIter lastModel -2 1 -1 1 @iteration)))
 
         (mandelbrotToCanvas (get @history @iteration) $canvas @iteration)
-        (.html $out @iteration)
-        (swap! iteration inc))
+        (set! (.-innerHTML $out) @iteration)
+        (swap! iteration inc)
+        (swap! state assoc :in-calculation false))
       (startStop nil)
       )))
 
-(.click ($ :#startStopButton) startStop)
+(set! (.-onclick (by-id "startStopButton")) startStop)
 (.setInterval js/window gameLoop 30)
-
-(defn on-js-reload [] )

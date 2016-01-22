@@ -101,18 +101,6 @@
             document.getElementById('iterationsInput').disabled = true;
         }
 
-        // TODO delete this useless block
-        var start = new Date().getTime();
-        console.log("Start");
-        var res = [];
-        var xmin = -2;
-        var xmax = 1;
-        for (var ix = 0; ix < 1000*1000; ix++) {
-            res.push(xmin + (xmax - xmin) * ix / (WIDTH - 1));
-        }
-        console.log("Stop " + res.length + "  " + (new Date().getTime() - start));
-        // TODO delete this useless block - end
-
         started = !started;
     }
 
