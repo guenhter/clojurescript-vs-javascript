@@ -53,3 +53,29 @@ alsdjf")
 (println true)
 
 (println ({:a 1} :a))
+(println {:alpha {:beta {:gamma {:delta {:epsilon {:zeta 1234}}}}}})
+(println (get-in {:alpha {:beta {:gamma {:delta {:epsilon {:zeta 1234}}}}}} [:alpha :beta :gamma]))
+
+
+(println (and true true))
+(println (and true false))
+(println (and (:c {:c true}) (not (:d {:d false}))))
+(println "end")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -20,8 +20,6 @@
               [{:id "dev"
                 :source-paths ["src"]
 
-                :figwheel {:on-jsload "clojurescript-sandbox.core/on-js-reload"}
-
                 :compiler {:main clojurescript-sandbox.core
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/compiled/clojurescript_sandbox.js"

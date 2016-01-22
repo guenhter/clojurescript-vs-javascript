@@ -25,3 +25,8 @@
 (println @c)
 (swap! c inc)
 (println @c)
+
+(def m (atom {:counter 1}))
+(println (:counter @m))
+(swap! m #(merge-with + % {:counter 1}))
+(println (:counter @m))
